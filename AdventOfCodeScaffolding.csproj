@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon></ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Calendar_16x.ico" />
+    <None Remove="Resources\StatusHelp_16x.png" />
+    <None Remove="Resources\StatusInvalid_16x.png" />
+    <None Remove="Resources\StatusOK_16x.png" />
+    <None Remove="Resources\StatusWarning_16x.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Calendar_16x.ico" />
+    <Resource Include="Resources\StatusHelp_16x.png" />
+    <Resource Include="Resources\StatusInvalid_16x.png" />
+    <Resource Include="Resources\StatusOK_16x.png" />
+    <Resource Include="Resources\StatusWarning_16x.png" />
+  </ItemGroup>
+
+</Project>
