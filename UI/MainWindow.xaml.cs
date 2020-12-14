@@ -68,7 +68,11 @@ namespace AdventOfCodeScaffolding.UI
             try
             {
                 object result = null;
-                metrics = Metrics.Measure(maxMilliseconds: 150, minReps: 10, () =>
+                metrics = Metrics.Measure(
+                    maxMilliseconds: 150, 
+                    minReps: 10, 
+                    runOnceOnly: !EnableBenchmarking,
+                    action: () =>
                 {
                     var newResult = action();
                     if (result != null && !result.Equals(newResult))
@@ -152,5 +156,14 @@ namespace AdventOfCodeScaffolding.UI
             DependencyProperty.Register("SelectedChallenge",
             typeof(ChallengeInfo), typeof(MainWindow),
             new PropertyMetadata(null, (s, e) => ((MainWindow)s).UpdateTestResults((ChallengeInfo) e.NewValue)));
-    }
+
+		public bool EnableBenchmarking
+		{
+			get { return (bool)GetValue(EnableBenchmarkingProperty); }
+			set { SetValue(EnableBenchmarkingProperty, value); }
+		}
+
+		public static readonly DependencyProperty EnableBenchmarkingProperty =
+			DependencyProperty.Register("EnableBenchmarking", typeof(bool), typeof(MainWindow), new UIPropertyMetadata(true));
+	}
 }

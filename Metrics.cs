@@ -10,16 +10,19 @@ namespace AdventOfCodeScaffolding.Util
     {
         public static readonly Metrics Empty = new Metrics(new List<long>(0));
 
-        public static Metrics Measure(long maxMilliseconds, int minReps, Action action)
+        private const long tpus = TimeSpan.TicksPerMillisecond / 1000;
+
+        public static Metrics Measure(long maxMilliseconds, int minReps, Action action, bool runOnceOnly = false)
         {
             var times = new List<long>(minReps);
             var totalTime = Stopwatch.StartNew();
-            const long tpus = TimeSpan.TicksPerMillisecond / 1000;
             for (int i = 0; i < minReps || totalTime.ElapsedMilliseconds < maxMilliseconds; i++)
             {
                 var timer = Stopwatch.StartNew();
                 action();
                 times.Add(timer.Elapsed.Ticks / tpus);
+                if (runOnceOnly)
+                    break;
             }
 
             return new Metrics(times);
