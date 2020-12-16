@@ -34,12 +34,16 @@ namespace AdventOfCodeScaffolding
             this.CancellationToken = this.CancellationTokenSource.Token;
         }
 
+        /// <summary>
+        /// Will throw an OperationCanceledException if the user hits the Cancel button since running this challenge.
+        /// Please call this during inner loops at convenient places if the calculation may be very long.
+        /// </summary>
         protected void AllowCancel()
         {
             this.CancellationToken.ThrowIfCancellationRequested();
         }
 
 		internal CancellationTokenSource CancellationTokenSource {get;}
-        protected CancellationToken CancellationToken {get;}
+        private CancellationToken CancellationToken {get;}
 	}
 }
