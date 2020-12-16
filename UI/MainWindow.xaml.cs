@@ -48,9 +48,11 @@ namespace AdventOfCodeScaffolding.UI
                 .ToList();
 
             SelectedChallenge = Challenges.LastOrDefault();
+
+            Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
         }
 
-        private void Run_Click(object sender, RoutedEventArgs e)
+		private void Run_Click(object sender, RoutedEventArgs e)
         {
             if (SelectedChallenge == null)
                 return;
@@ -62,6 +64,10 @@ namespace AdventOfCodeScaffolding.UI
             Part1.Update(pt1Result, pt1Metrics);
             Part2.Update(pt2Result, pt2Metrics);
         }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+		{
+		}
 
         private object Measure(Func<object> action, out Metrics metrics)
         {
@@ -165,5 +171,48 @@ namespace AdventOfCodeScaffolding.UI
 
 		public static readonly DependencyProperty EnableBenchmarkingProperty =
 			DependencyProperty.Register("EnableBenchmarking", typeof(bool), typeof(MainWindow), new UIPropertyMetadata(true));
+
+		public bool IsRunning
+		{
+			get { return (bool)GetValue(IsRunningProperty); }
+			set { SetValue(IsRunningProperty, value); }
+		}
+
+		public static readonly DependencyProperty IsRunningProperty =
+			DependencyProperty.Register("IsRunning", typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
+
+
+		#region Log Window
+
+		private LogWindow logWindow = null;
+
+        void ShowLogWindow()
+        {
+            if (logWindow == null)
+            {
+                logWindow = new LogWindow();
+			    logWindow.Closed += LogWindow_Closed;
+            }
+
+            logWindow.Show();
+            logWindow.Activate();
+        }
+
+        void CloseLogWindow()
+        {
+            logWindow?.Close();
+        }
+
+		private void LogWindow_Closed(object sender, EventArgs e)
+		{
+            logWindow = null;
+		}
+
+		private void ShowLog_Click(object sender, RoutedEventArgs e)
+		{
+            ShowLogWindow();
+		}
+
+		#endregion // Log Window
 	}
 }

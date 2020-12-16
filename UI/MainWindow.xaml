@@ -6,6 +6,10 @@
         xmlns:local="clr-namespace:AdventOfCodeScaffolding.UI"
         mc:Ignorable="d"
         Title="Advent of code" Height="450" Width="800" Icon="../Resources/Calendar_16x.ico">
+	<Window.Resources>
+		<local:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+		<local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+	</Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -36,13 +40,26 @@
                     DisplayMemberPath="Name"
                     VerticalContentAlignment="Center"
                 />
-			<Button Margin="0,4,4,4" MinWidth="60" Content="Run" Grid.Row="0" Grid.Column="1" Padding="5" Click="Run_Click"/>
+			<Button Margin="0,4,4,4" MinWidth="60" Content="Run" IsEnabled="{Binding Path=IsRunning, Converter={StaticResource InverseBooleanConverter}}" Grid.Row="0" Grid.Column="1" Padding="5" Click="Run_Click"/>
 		</Grid>
         <local:OutputPane Title="Part 1" x:Name="Part1" Grid.Column="1" Grid.Row="0"/>
         <local:OutputPane Title="Part 2" x:Name="Part2" Grid.Column="1" Grid.Row="1"/>
-		<CheckBox Margin="4,4,12,4" Content="Enable Benchmarking"
-            Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
-            IsChecked="{Binding Path=EnableBenchmarking}"
+		<Grid Grid.Column="1" Grid.Row="2">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto"/>
+				<ColumnDefinition Width="1*"/>
+				<ColumnDefinition Width="Auto"/>
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+			<Button Margin="0,4,4,4" MinWidth="60" Content="Cancel" Visibility="{Binding Path=IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}" Grid.Row="0" Grid.Column="0" Padding="5" Click="Cancel_Click"/>
+			<CheckBox Margin="4,4,12,4" Content="Enable Benchmarking"
+                Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"
+                IsChecked="{Binding Path=EnableBenchmarking}"
             />
+			<Button Margin="0,4,4,4" MinWidth="60" Content="Show Log" Grid.Row="0" Grid.Column="2" Padding="5" Click="ShowLog_Click"/>
+		</Grid>
+		
 	</Grid>
 </Window>
