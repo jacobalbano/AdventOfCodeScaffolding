@@ -83,12 +83,12 @@ namespace AdventOfCodeScaffolding.UI
                     try
                     {
                         part = 1;
-                        pt1Result = Measure(() => instance.Part1(Input), out pt1Metrics, benchmark);
+                        pt1Result = Measure(() => instance.Part1(Input), out pt1Metrics, benchmark, cancelToken);
 
                         cancelToken.ThrowIfCancellationRequested();
 
                         part = 2;
-                        pt2Result = Measure(() => instance.Part2(Input), out pt2Metrics, benchmark);
+                        pt2Result = Measure(() => instance.Part2(Input), out pt2Metrics, benchmark, cancelToken);
 
                         part = 3;
                     }
@@ -121,7 +121,7 @@ namespace AdventOfCodeScaffolding.UI
             cancelTokenSource?.Cancel();
 		}
 
-        private static object Measure(Func<object> action, out Metrics metrics, bool benchmark)
+        private static object Measure(Func<object> action, out Metrics metrics, bool benchmark, CancellationToken cancelToken)
         {
             try
             {
@@ -132,6 +132,8 @@ namespace AdventOfCodeScaffolding.UI
                     runOnceOnly: !benchmark,
                     action: () =>
                 {
+                    cancelToken.ThrowIfCancellationRequested();
+
                     var newResult = action();
                     if (result != null && !result.Equals(newResult))
                         throw new Exception($"Result differed between test runs! Old: {result}, New: {newResult}");
