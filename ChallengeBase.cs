@@ -32,6 +32,7 @@ namespace AdventOfCodeScaffolding
 		{
             this.CancellationTokenSource = new CancellationTokenSource();
             this.CancellationToken = this.CancellationTokenSource.Token;
+            this.Logger = new NotReadyLogger();
         }
 
         /// <summary>
@@ -43,7 +44,38 @@ namespace AdventOfCodeScaffolding
             this.CancellationToken.ThrowIfCancellationRequested();
         }
 
+        /// <summary>
+        /// Enables convenient log output to the scaffolding Log Window, including automatic indentation within contextual blocks.
+        /// </summary>
+        /// <remarks>
+        /// Log output is appended to the content of the log even when the log window is not visible.
+        /// Do not log excessively.  The log accumulates in memory until manually cleared or the program is exitted.
+        /// 
+        /// Use only within part runs - do not use within challenge constructor (if any) or InvalidOperationException will be thrown
+        /// from any method call.
+        /// </remarks>
+        protected ILogger Logger {get; private set;}
+
 		internal CancellationTokenSource CancellationTokenSource {get;}
         private CancellationToken CancellationToken {get;}
+
+        internal ILogger InternalLogger
+        {
+            get {return Logger;}
+            set {Logger = value;}
+        }
+
+		internal class NotReadyLogger : ILogger
+		{
+			public IDisposable Context(string section)
+			{
+                throw new InvalidOperationException("Cannot use ChallengeBase.Logger outside of part runs.");
+			}
+
+			public void LogLine(string message)
+			{
+                throw new InvalidOperationException("Cannot use ChallengeBase.Logger outside of part runs.");
+			}
+		}
 	}
 }

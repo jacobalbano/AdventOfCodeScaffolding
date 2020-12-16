@@ -23,5 +23,10 @@ namespace AdventOfCodeScaffolding.UI
 		{
 			InitializeComponent();
 		}
+
+		internal static ILogger CreateLogger()
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

@@ -37,8 +37,12 @@ namespace AdventOfCodeScaffolding.UI
 
         public string Input { get; set; }
 
+        private ILogger Logger {get;}
+
         public MainWindow()
         {
+            this.Logger = LogWindow.CreateLogger();
+
             InitializeComponent();
             DataContext = this;
             Challenges = Assembly.GetEntryAssembly().GetTypes()
@@ -51,14 +55,16 @@ namespace AdventOfCodeScaffolding.UI
             SelectedChallenge = Challenges.LastOrDefault();
 
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
+
         }
 
 		private async void Run_Click(object sender, RoutedEventArgs e)
         {
-            if (SelectedChallenge == null)
+            if (IsRunning || SelectedChallenge == null)
                 return;
 
             var instance = SelectedChallenge.Create();
+            instance.InternalLogger = this.Logger;
 
             object pt1Result, pt2Result;
             Metrics pt1Metrics, pt2Metrics;
@@ -68,7 +74,7 @@ namespace AdventOfCodeScaffolding.UI
             Part1.Update(pt1Result, pt1Metrics);
             Part2.Update(pt2Result, pt2Metrics);
 
-            pt1Result = pt2Result = "!! Unexpected: Incomplete Run !!";
+            pt1Result = pt2Result = "!! Incomplete Run !!";
 
             bool benchmark = EnableBenchmarking;
 
@@ -77,31 +83,61 @@ namespace AdventOfCodeScaffolding.UI
 
             IsRunning = true;
 
+            // since the run may be long, and the UI could allow selecting another challenge mid-run, we must cache day/name for reliable logging.
+            var selectedChallengeDay = SelectedChallenge.Day;
+            var selectedChallengeName = SelectedChallenge.Name;
+
             await Task.Run(() =>
                 {
                     int part = 0;
-                    try
-                    {
-                        part = 1;
-                        pt1Result = Measure(() => instance.Part1(Input), out pt1Metrics, benchmark, cancelToken);
+					try
+					{
+						void logPartHeading()
+						{
+							Logger.LogLine($"\n\n====== Running: Day {selectedChallengeDay} - {selectedChallengeName}, Part {part} ======\n");
+						}
 
-                        cancelToken.ThrowIfCancellationRequested();
+						part = 1;
+						logPartHeading();
+						pt1Result = Measure(() => instance.Part1(Input), out pt1Metrics, benchmark, cancelToken);
 
-                        part = 2;
-                        pt2Result = Measure(() => instance.Part2(Input), out pt2Metrics, benchmark, cancelToken);
+						cancelToken.ThrowIfCancellationRequested();
 
-                        part = 3;
-                    }
-                    catch (Exception ex)
-                    {
-                        var s = ex.ToString();
-					    if (part == 1)
-						    pt1Result = s;
-					    else if (part == 2)
-						    pt2Result = s;
+						part = 2;
+						logPartHeading();
+						pt2Result = Measure(() => instance.Part2(Input), out pt2Metrics, benchmark, cancelToken);
 
-                        Debug.WriteLine($"\nWARNING: exception running where part = {part}:\n[start]\n{s}\n[end]\n");
-                    }
+						Logger.LogLine("\n====== Done ======");
+						part = 3;
+					}
+					catch (Exception ex)
+					{
+						// and now for some ultra-reliable exposure of any problem
+
+						try
+						{
+							using (Logger.Context($"\nEXCEPTION during Part {part}:"))
+								Logger.LogLine(ex.ToString());
+							Logger.LogLine();
+						}
+						catch (Exception ex2)
+						{
+							try
+							{
+								Debug.WriteLine($"\nWARNING -- attempting to log the exception resulted in an additional exception:\n{ex2}\n");
+							}
+							catch { } // intentional squelch
+						}
+
+						var s = ex.ToString();
+
+						if (part == 1)
+							pt1Result = s;
+						else if (part == 2)
+							pt2Result = s;
+
+						Debug.WriteLine($"\nWARNING: exception running part {part}:\n[start]\n{s}\n[end]\n");
+					}
                 },
                 cancelToken
             );
