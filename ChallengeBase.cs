@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace AdventOfCodeScaffolding
 {
@@ -26,5 +27,19 @@ namespace AdventOfCodeScaffolding
 
         public virtual object Part2(string input) => throw new NotImplementedException();
         public virtual void Part2Test() => throw new NotImplementedException();
-    }
+
+		protected ChallengeBase()
+		{
+            this.CancellationTokenSource = new CancellationTokenSource();
+            this.CancellationToken = this.CancellationTokenSource.Token;
+        }
+
+        protected void AllowCancel()
+        {
+            this.CancellationToken.ThrowIfCancellationRequested();
+        }
+
+		internal CancellationTokenSource CancellationTokenSource {get;}
+        protected CancellationToken CancellationToken {get;}
+	}
 }

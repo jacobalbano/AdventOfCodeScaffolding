@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Reflection;
 using LX = System.Linq.Expressions;
+using System.Threading;
 
 namespace AdventOfCodeScaffolding.UI
 {
@@ -52,24 +53,75 @@ namespace AdventOfCodeScaffolding.UI
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
         }
 
-		private void Run_Click(object sender, RoutedEventArgs e)
+		private async void Run_Click(object sender, RoutedEventArgs e)
         {
             if (SelectedChallenge == null)
                 return;
 
             var instance = SelectedChallenge.Create();
-            var pt1Result = Measure(() => instance.Part1(Input), out var pt1Metrics);
-            var pt2Result = Measure(() => instance.Part2(Input), out var pt2Metrics);
+
+            object pt1Result, pt2Result;
+            Metrics pt1Metrics, pt2Metrics;
+            pt1Result = pt2Result = "Running...";
+            pt1Metrics = pt2Metrics = Metrics.Empty;
+
+            Part1.Update(pt1Result, pt1Metrics);
+            Part2.Update(pt2Result, pt2Metrics);
+
+            pt1Result = pt2Result = "!! Unexpected: Incomplete Run !!";
+
+            bool benchmark = EnableBenchmarking;
+
+            cancelTokenSource = instance.CancellationTokenSource;
+            var cancelToken = cancelTokenSource.Token;
+
+            IsRunning = true;
+
+            await Task.Run(() =>
+                {
+                    int part = 0;
+                    try
+                    {
+                        part = 1;
+                        pt1Result = Measure(() => instance.Part1(Input), out pt1Metrics, benchmark);
+
+                        cancelToken.ThrowIfCancellationRequested();
+
+                        part = 2;
+                        pt2Result = Measure(() => instance.Part2(Input), out pt2Metrics, benchmark);
+
+                        part = 3;
+                    }
+                    catch (Exception ex)
+                    {
+                        var s = ex.ToString();
+					    if (part == 1)
+						    pt1Result = s;
+					    else if (part == 2)
+						    pt2Result = s;
+
+                        Debug.WriteLine($"\nWARNING: exception running where part = {part}:\n[start]\n{s}\n[end]\n");
+                    }
+                },
+                cancelToken
+            );
+
+            IsRunning = false;
+
+            cancelTokenSource = null;
 
             Part1.Update(pt1Result, pt1Metrics);
             Part2.Update(pt2Result, pt2Metrics);
         }
 
+        private CancellationTokenSource cancelTokenSource = null;
+
         private void Cancel_Click(object sender, RoutedEventArgs e)
 		{
+            cancelTokenSource?.Cancel();
 		}
 
-        private object Measure(Func<object> action, out Metrics metrics)
+        private static object Measure(Func<object> action, out Metrics metrics, bool benchmark)
         {
             try
             {
@@ -77,7 +129,7 @@ namespace AdventOfCodeScaffolding.UI
                 metrics = Metrics.Measure(
                     maxMilliseconds: 150, 
                     minReps: 10, 
-                    runOnceOnly: !EnableBenchmarking,
+                    runOnceOnly: !benchmark,
                     action: () =>
                 {
                     var newResult = action();
