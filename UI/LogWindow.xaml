@@ -7,6 +7,24 @@
         mc:Ignorable="d"
         Title="LogWindow" Height="450" Width="800">
     <Grid>
-        
-    </Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="1*"/>
+			<ColumnDefinition Width="Auto"/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="1*"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+		<TextBox
+			Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1" FontFamily="Lucida Console"
+			IsReadOnly="true" TextWrapping="NoWrap"
+			HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"
+			Name="logTextBox"
+		/>
+		<CheckBox Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"
+			Content="Live Update" VerticalAlignment="Center" HorizontalAlignment="Left" Visibility="Hidden"/>
+		<Button Grid.Column="2" Grid.Row="0" Content="Clear" Margin="0,4,4,4" MinWidth="60" Padding="5" Click="Clear_Click"/>
+	</Grid>
 </Window>

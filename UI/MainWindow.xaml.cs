@@ -41,7 +41,7 @@ namespace AdventOfCodeScaffolding.UI
 
         public MainWindow()
         {
-            this.Logger = LogWindow.CreateLogger();
+            this.Logger = LogWindow.SingletonLogger;
 
             InitializeComponent();
             DataContext = this;
@@ -83,8 +83,7 @@ namespace AdventOfCodeScaffolding.UI
 
             IsRunning = true;
 
-            // since the run may be long, and the UI could allow selecting another challenge mid-run, we must cache day/name for reliable logging.
-            var selectedChallengeDay = SelectedChallenge.Day;
+            // since the run may be long, and the UI could allow selecting another challenge mid-run, we must cache name for reliable logging.
             var selectedChallengeName = SelectedChallenge.Name;
 
             await Task.Run(() =>
@@ -94,7 +93,7 @@ namespace AdventOfCodeScaffolding.UI
 					{
 						void logPartHeading()
 						{
-							Logger.LogLine($"\n\n====== Running: Day {selectedChallengeDay} - {selectedChallengeName}, Part {part} ======\n");
+							Logger.LogLine($"\n\n====== Running: {selectedChallengeName}, Part {part} ======\n");
 						}
 
 						part = 1;
