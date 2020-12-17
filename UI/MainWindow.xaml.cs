@@ -74,7 +74,7 @@ namespace AdventOfCodeScaffolding.UI
             Part1.Update(pt1Result, pt1Metrics);
             Part2.Update(pt2Result, pt2Metrics);
 
-            pt1Result = pt2Result = "!! Incomplete Run !!";
+            pt1Result = pt2Result = "(did not run)";
 
             bool benchmark = EnableBenchmarking;
 
@@ -93,7 +93,7 @@ namespace AdventOfCodeScaffolding.UI
 					{
 						void logPartHeading()
 						{
-							Logger.LogLine($"\n\n====== Running: {selectedChallengeName}, Part {part} ======\n");
+							Logger.LogLine($"====== Running: {selectedChallengeName}, Part {part} ======");
 						}
 
 						part = 1;
@@ -106,7 +106,7 @@ namespace AdventOfCodeScaffolding.UI
 						logPartHeading();
 						pt2Result = Measure(() => instance.Part2(Input), out pt2Metrics, benchmark, cancelToken);
 
-						Logger.LogLine("\n====== Done ======");
+						Logger.LogLine("====== Done ======");
 						part = 3;
 					}
 					catch (Exception ex)

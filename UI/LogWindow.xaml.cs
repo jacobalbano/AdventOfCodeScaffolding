@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -58,10 +60,32 @@ namespace AdventOfCodeScaffolding.UI
 		 * CarryOverState when the LogWindow is closed, or in the LogWindow.TexBox
 		 * when the LogWindow is visible.  No wasted memory.
 		 * 
+		 * ---
+		 * 
+		 * Debouncing:
+		 * 
+		 * When a challenge part logs a huge amount of text for a long time without
+		 * explicitly sleeping and the LogWindow is visible, the UI thread would
+		 * become totally unresponsive - this makes cancelling useless in such
+		 * cases.  To prevent this, a debouncer is interposed betwen Logger_LogUpdated
+		 * (directly invoked after every log event) and UpdateLogView (which
+		 * immediately consumes all available log events, then updates the UI).
+		 * 
+		 * The debouncer ensures that any log update that occurs within 250
+		 * milliseconds of the last is ignored.  When such a "squelch" happens,
+		 * the next time a call is not ignored a Thread.Sleep(50) is invoked,
+		 * to force available at least a little time for the UI to catch up.
+		 * 
+		 * Since the last logevent might be thus "debounced", a timer is also
+		 * set up to update the UI explicitly every 250 milliseconds.  This
+		 * makes sure that even when log events occur so rapidly that most
+		 * of them are debounced, 
+		 * 
 		 */
 
 		private static readonly Logger logger = new();
 		internal static ILogger SingletonLogger => logger;
+		private Timer minUpdateTimer;
 
 		public LogWindow()
 		{
@@ -74,6 +98,13 @@ namespace AdventOfCodeScaffolding.UI
 			this.Closed += LogWindow_Closed;
 
 			this.Loaded += LogWindow_Loaded;
+
+			minUpdateTimer = new Timer(
+				callback: new TimerCallback(_ => Logger_LogUpdated()),
+				state: null,
+				dueTime: 100,
+				period: 250
+			);
 		}
 
 		private void LogWindow_Loaded(object sender, RoutedEventArgs e)
@@ -94,15 +125,99 @@ namespace AdventOfCodeScaffolding.UI
 
 		private void LogWindow_Closed(object sender, EventArgs e)
 		{
+			minUpdateTimer.Dispose();
 			logger.LogUpdated -= Logger_LogUpdated;
 			closed = true;
 			carryOverState = new CarryOverState{Depth = depth, AllText = logTextBox.Text};
 		}
 
+		private static volatile uint count_Logger_LogUpdated = 0;
+		private static volatile uint count_Dispatcher_Invoke_UpdateLogView = 0;
+
 		private void Logger_LogUpdated()
 		{
-			Dispatcher.Invoke(UpdateLogView);
+			Interlocked.Increment(ref count_Logger_LogUpdated);
+
+			debouncer.Debounce(()=>
+				{
+					Interlocked.Increment(ref count_Dispatcher_Invoke_UpdateLogView);
+
+					Dispatcher.Invoke(UpdateLogView);
+				}
+			);
 		}
+
+		private readonly static Debouncer debouncer = new();
+
+		private class Debouncer
+		{
+			private readonly object lockObject = new();
+			private Stopwatch stopwatch = null;
+			const long minMillisecondsBetweenInvocations = 250;
+			const int minSleepMillisecondsAddedAfterSquelch = 50;
+			ulong totalSquelched, squelchedThisTime, maxSquelchedAtATime;
+			bool addDelayNextTime = false;
+
+			/// <summary>
+			/// This method makes sure that the action is invoked at least once after every
+			/// batch of calls, but discards rapidly successive invocations before the first 
+			/// invocation per batch completes.
+			/// </summary>
+			/// <remarks>
+			/// The caller MUST pass the same action on each invocation.
+			/// 
+			/// This method is intended to allow, for example, UI updates to proceed
+			/// less frequently than underlying data is updated, but still reliabily, in order to
+			/// avoid wasting CPU time and locking an application when there are rapid udpate
+			/// notifications from a background thread.
+			/// 
+			/// This is in experimental status, so there is no customization yet.
+			/// </remarks>
+			/// <param name="a"></param>
+			public void Debounce(Action a)
+			{
+				bool addDelayThisTime = false;
+
+				lock (lockObject)
+				{
+					if (addDelayNextTime)
+					{
+						addDelayThisTime = true;
+						addDelayNextTime = false;
+					}
+
+					if (stopwatch != null && stopwatch.ElapsedMilliseconds < minMillisecondsBetweenInvocations)
+					{
+						addDelayNextTime = true;
+						++totalSquelched;
+						++squelchedThisTime;
+						if (maxSquelchedAtATime < squelchedThisTime)
+							maxSquelchedAtATime = squelchedThisTime;
+						return;
+					}
+				}
+
+				try
+				{
+					Thread.Sleep(0);
+					a();
+					Thread.Sleep(addDelayThisTime ? minSleepMillisecondsAddedAfterSquelch : 0);
+				}
+				finally
+				{
+					lock (lockObject)
+					{
+						squelchedThisTime = 0;
+
+						if (stopwatch == null)
+							stopwatch = Stopwatch.StartNew();
+						else
+							stopwatch.Restart();
+					}
+				}
+			}
+		}
+
 
 		private void Clear_Click(object sender, RoutedEventArgs e)
 		{
