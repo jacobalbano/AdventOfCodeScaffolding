@@ -18,19 +18,14 @@ namespace AdventOfCodeScaffolding.Util
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            switch ((TestResults)value)
+            return ((TestResults)value) switch
             {
-                case TestResults.None:
-                    return "../Resources/StatusHelp_16x.png";
-                case TestResults.NotImplemented:
-                    return "../Resources/StatusWarning_16x.png";
-                case TestResults.Failed:
-                    return "../Resources/StatusInvalid_16x.png";
-                case TestResults.Passed:
-                    return "../Resources/StatusOK_16x.png";
-                default:
-                    throw new NotSupportedException();
-            }
+                TestResults.None => "../Resources/StatusHelp_16x.png",
+                TestResults.NotImplemented => "../Resources/StatusWarning_16x.png",
+                TestResults.Failed => "../Resources/StatusInvalid_16x.png",
+                TestResults.Passed => "../Resources/StatusOK_16x.png",
+                _ => throw new NotSupportedException(),
+            };
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -43,19 +38,14 @@ namespace AdventOfCodeScaffolding.Util
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            switch ((TestResults)value)
+            return ((TestResults)value) switch
             {
-                case TestResults.None:
-                    return "Pending test completion";
-                case TestResults.NotImplemented:
-                    return "Test is not yet implemented";
-                case TestResults.Failed:
-                    return "Test failed";
-                case TestResults.Passed:
-                    return "Test passed";
-                default:
-                    throw new NotSupportedException();
-            }
+                TestResults.None => "Pending test completion",
+                TestResults.NotImplemented => "Test is not yet implemented",
+                TestResults.Failed => "Test failed",
+                TestResults.Passed => "Test passed",
+                _ => throw new NotSupportedException(),
+            };
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
