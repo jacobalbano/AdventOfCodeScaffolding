@@ -6,40 +6,60 @@
         xmlns:local="clr-namespace:AdventOfCodeScaffolding.UI"
         mc:Ignorable="d"
         Title="Advent of code" Height="450" Width="800" Icon="../Resources/Calendar_16x.ico">
+	<Window.Resources>
+		<local:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+		<local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+	</Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <GroupBox Padding="3" Header="Input" Grid.Row="0" Grid.RowSpan="2">
-            <Grid Grid.Column="0" Grid.RowSpan="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <TextBox Grid.ColumnSpan="2" Text="{Binding Input}" TextWrapping="NoWrap" AcceptsReturn="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible"/>
-
-                <ComboBox
-                    Margin="0,4,4,0"
-                    Grid.Row="1"
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+        <GroupBox Padding="3" Header="Input" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2">
+            <TextBox Grid.ColumnSpan="2" Text="{Binding Input}" TextWrapping="NoWrap" AcceptsReturn="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible"/>
+        </GroupBox>
+		<Grid Grid.Column="0" Grid.Row="2">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="1*"/>
+				<ColumnDefinition Width="Auto"/>
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+			<ComboBox
+                    Margin="4,4,4,4"
+                    Grid.Row="0"
                     Grid.Column="0"
                     ItemsSource="{Binding Challenges}"
                     SelectedItem="{Binding SelectedChallenge}"
                     DisplayMemberPath="Name"
                     VerticalContentAlignment="Center"
                 />
-                <Button Margin="0,4,0,0" MinWidth="60" Content="Run" Grid.Row="1" Grid.Column="1" Padding="5" Click="Run_Click"/>
-            </Grid>
-        </GroupBox>
-        <local:OutputPane Title="Part 1" x:Name="Part1" Grid.Column="1" />
+			<Button Margin="0,4,4,4" MinWidth="60" Content="Run" IsEnabled="{Binding Path=IsRunning, Converter={StaticResource InverseBooleanConverter}}" Grid.Row="0" Grid.Column="1" Padding="5" Click="Run_Click"/>
+		</Grid>
+        <local:OutputPane Title="Part 1" x:Name="Part1" Grid.Column="1" Grid.Row="0"/>
         <local:OutputPane Title="Part 2" x:Name="Part2" Grid.Column="1" Grid.Row="1"/>
-    </Grid>
+		<Grid Grid.Column="1" Grid.Row="2">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto"/>
+				<ColumnDefinition Width="1*"/>
+				<ColumnDefinition Width="Auto"/>
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+			<Button Margin="0,4,4,4" MinWidth="60" Content="Cancel" Visibility="{Binding Path=IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}" Grid.Row="0" Grid.Column="0" Padding="5" Click="Cancel_Click"/>
+			<CheckBox Margin="4,4,12,4" Content="Enable Benchmarking"
+                Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"
+                IsChecked="{Binding Path=EnableBenchmarking}"
+            />
+			<Button Margin="0,4,4,4" MinWidth="60" Content="Show Log" Grid.Row="0" Grid.Column="2" Padding="5" Click="ShowLog_Click"/>
+		</Grid>
+		
+	</Grid>
 </Window>
