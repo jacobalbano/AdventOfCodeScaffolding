@@ -186,21 +186,24 @@ namespace AdventOfCodeScaffolding.UI
             catch { throw; }
         }
 
-        private static TestResults GetTestResult(Action runTest)
+        private static Task<TestResults> GetTestResult(Action runTest)
         {
-            try
+            return Task.Run(() =>
             {
-                runTest();
-                return TestResults.Passed;
-            }
-            catch (NotImplementedException)
-            {
-                return TestResults.NotImplemented;
-            }
-            catch
-            {
-                return TestResults.Failed;
-            }
+                try
+                {
+                    runTest();
+                    return TestResults.Passed;
+                }
+                catch (NotImplementedException)
+                {
+                    return TestResults.NotImplemented;
+                }
+                catch
+                {
+                    return TestResults.Failed;
+                }
+            });
         }
 
         public class ChallengeInfo
@@ -236,15 +239,18 @@ namespace AdventOfCodeScaffolding.UI
             public delegate ChallengeBase Factory();
         }
 
-        private void UpdateTestResults(ChallengeInfo value)
+        private async void UpdateTestResults(ChallengeInfo value)
         {
             if (value == null)
                 return;
 
+            Part1.TestResults = TestResults.None;
+            Part2.TestResults = TestResults.None;
+
             var instance = value.Create();
 
-            Part1.TestResults = GetTestResult(() => instance.Part1Test());
-            Part2.TestResults = GetTestResult(() => instance.Part2Test());
+            Part1.TestResults = await GetTestResult(() => instance.Part1Test());
+            Part2.TestResults = await GetTestResult(() => instance.Part2Test());
         }
 
         private static readonly DependencyProperty selectedChallengeDp =
