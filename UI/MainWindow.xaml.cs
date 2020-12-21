@@ -88,6 +88,7 @@ namespace AdventOfCodeScaffolding.UI
 
             await Task.Run(() =>
                 {
+                    instance.InternalLogger = this.Logger; // reset to set TLS
                     int part = 0;
 					try
 					{

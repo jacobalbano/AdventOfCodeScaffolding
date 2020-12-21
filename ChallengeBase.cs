@@ -28,11 +28,14 @@ namespace AdventOfCodeScaffolding
         public virtual object Part2(string input) => throw new NotImplementedException();
         public virtual void Part2Test() => throw new NotImplementedException();
 
+        [ThreadStatic]
+        private static ILogger threadLogger = null;
+
 		protected ChallengeBase()
 		{
             this.CancellationTokenSource = new CancellationTokenSource();
             this.CancellationToken = this.CancellationTokenSource.Token;
-            this.Logger = new NotReadyLogger();
+            threadLogger = this.Logger = new NotReadyLogger();
         }
 
         /// <summary>
@@ -62,8 +65,10 @@ namespace AdventOfCodeScaffolding
         internal ILogger InternalLogger
         {
             get {return Logger;}
-            set {Logger = value;}
+            set {threadLogger = Logger = value;}
         }
+
+        public static ILogger ThreadLogger => threadLogger;
 
 		internal class NotReadyLogger : ILogger
 		{
