@@ -48,6 +48,7 @@ namespace AdventOfCodeScaffolding.UI
             Challenges = Assembly.GetEntryAssembly().GetTypes()
                 .Where(x => typeof(ChallengeBase).IsAssignableFrom(x) && !x.IsAbstract)
                 .Where(x => x.IsDefined(typeof(ChallengeAttribute), false))
+                .Where(x => {var a = x.GetCustomAttribute<ChallengeAttribute>(false); return a.DayNum >= 1 && a.DayNum <= 25;})
                 .Select(ChallengeInfo.FromType)
                 .OrderBy(x => x.Day)
                 .ToList();
