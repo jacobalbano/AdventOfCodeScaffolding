@@ -26,11 +26,7 @@ namespace AdventOfCodeScaffolding.UI
         public ChallengeInfo SelectedChallenge
         {
             get => (ChallengeInfo)GetValue(selectedChallengeDp);
-            set
-            {
-                SetValue(selectedChallengeDp, value);
-                UpdateTestResults(value);
-            }
+            set => SetValue(selectedChallengeDp, value);
         }
 
         public IReadOnlyList<ChallengeInfo> Challenges { get; }
@@ -55,7 +51,6 @@ namespace AdventOfCodeScaffolding.UI
             SelectedChallenge = Challenges.LastOrDefault();
 
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
-
         }
 
 		private async void Run_Click(object sender, RoutedEventArgs e)
