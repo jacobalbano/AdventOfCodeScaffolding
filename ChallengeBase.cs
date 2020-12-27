@@ -35,7 +35,7 @@ namespace AdventOfCodeScaffolding
 		{
             this.CancellationTokenSource = new CancellationTokenSource();
             this.CancellationToken = this.CancellationTokenSource.Token;
-            threadLogger = this.Logger = new NotReadyLogger();
+            threadLogger = this.Logger = notReadyLogger;
         }
 
         /// <summary>
@@ -68,8 +68,21 @@ namespace AdventOfCodeScaffolding
             set {threadLogger = Logger = value;}
         }
 
+        /// <summary>
+        /// Enables even more convenient log output to the scaffolding Log Window, including automatic indentation within contextual blocks,
+        /// without having to have an instance of a ChallengeBase-derived object.
+        /// </summary>
+        /// <remarks>
+        /// This property is only intended for use by types that are strictly assisting a ChallengeBase-derived object
+        /// during its execution of the Part1() or Part2() overrides.  Because it is static, it can be used for that purpose
+        /// without having to pass around the ILogger return value.
+        /// 
+        /// When accessed from the same thread that is running a challenge, this property returns that challenge's equivalent of base.Logger.
+        /// It should not be accessed by any other thread.  See ChallengeBase.Logger for more info.
+        /// </remarks>
         public static ILogger ThreadLogger => threadLogger;
 
+        internal readonly static NotReadyLogger notReadyLogger = new();
 		internal class NotReadyLogger : ILogger
 		{
 			public IDisposable Context(string section)

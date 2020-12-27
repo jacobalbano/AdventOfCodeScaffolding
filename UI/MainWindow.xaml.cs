@@ -89,7 +89,7 @@ namespace AdventOfCodeScaffolding.UI
 
             await Task.Run(() =>
                 {
-                    instance.InternalLogger = this.Logger; // reset to set TLS
+                    instance.InternalLogger = this.Logger; // reset to set TLS for ThreadLogger
                     int part = 0;
 					try
 					{
@@ -139,6 +139,10 @@ namespace AdventOfCodeScaffolding.UI
 
 						Debug.WriteLine($"\nWARNING: exception running part {part}:\n[start]\n{s}\n[end]\n");
 					}
+                    finally
+                    {
+                        instance.InternalLogger = ChallengeBase.notReadyLogger;
+                    }
                 },
                 cancelToken
             );
