@@ -181,22 +181,22 @@ namespace AdventOfCodeScaffolding.UI
             catch { throw; }
         }
 
-        private static Task<TestResults> GetTestResult(Action runTest)
+        private static Task<(TestResults, Exception)> GetTestResult(Action runTest)
         {
             return Task.Run(() =>
             {
                 try
                 {
                     runTest();
-                    return TestResults.Passed;
+                    return (TestResults.Passed, null);
                 }
-                catch (NotImplementedException)
+                catch (NotImplementedException e)
                 {
-                    return TestResults.NotImplemented;
+                    return (TestResults.NotImplemented, e);
                 }
-                catch
+                catch (Exception e)
                 {
-                    return TestResults.Failed;
+                    return (TestResults.Failed, e);
                 }
             });
         }
@@ -244,8 +244,32 @@ namespace AdventOfCodeScaffolding.UI
 
             var instance = value.Create();
 
-            Part1.TestResults = await GetTestResult(() => instance.Part1Test());
-            Part2.TestResults = await GetTestResult(() => instance.Part2Test());
+            instance.InternalLogger = Logger;
+
+            Exception e;
+            Logger.LogLine($"====== Running: {value.Name}, Part 1 test ======");
+            (Part1.TestResults, e) = await GetTestResult(() => instance.Part1Test());
+            LogResult(Part1.TestResults, e);
+
+            Logger.LogLine($"====== Running: {value.Name}, Part 2 test ======");
+            (Part2.TestResults, e) = await GetTestResult(() => instance.Part2Test());
+            LogResult(Part2.TestResults, e);
+
+            void LogResult(TestResults testResults, Exception e)
+            {
+                switch (testResults)
+                {
+                    case TestResults.NotImplemented:
+                        Logger.LogLine("Not Implemented");
+                        break;
+                    case TestResults.Failed:
+                        Logger.LogLine("Test failed!");
+                        Logger.LogException(e);
+                        break;
+                }
+
+                Logger.LogLine("====== Done ======");
+            }
         }
 
         private static readonly DependencyProperty selectedChallengeDp =
