@@ -21,7 +21,7 @@
 			<RowDefinition Height="Auto"/>
 		</Grid.RowDefinitions>
         <GroupBox Padding="3" Header="Input" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2">
-            <TextBox Grid.ColumnSpan="2" Text="{Binding Input}" TextWrapping="NoWrap" AcceptsReturn="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible"/>
+            <TextBox Grid.ColumnSpan="2" Text="{Binding Input}" TextWrapping="NoWrap" AcceptsReturn="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible" FontFamily="Consolas"/>
         </GroupBox>
 		<Grid Grid.Column="0" Grid.Row="2">
 			<Grid.ColumnDefinitions>

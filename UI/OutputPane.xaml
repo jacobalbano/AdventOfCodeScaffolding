@@ -22,7 +22,7 @@
                     <TextBlock Text="{Binding Metrics}" Padding="5,0,5,0"></TextBlock>
                 </StackPanel>
             </GroupBox.Header>
-            <TextBox Text="{Binding Output}" TextWrapping="NoWrap" IsReadOnly="True" AcceptsReturn="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible"/>
+            <TextBox Text="{Binding Output}" TextWrapping="NoWrap" IsReadOnly="True" AcceptsReturn="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible" FontFamily="Consolas"/>
         </GroupBox>
     </Grid>
 </UserControl>

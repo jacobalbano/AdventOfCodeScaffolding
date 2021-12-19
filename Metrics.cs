@@ -19,7 +19,7 @@ namespace AdventOfCodeScaffolding.Util
             for (int i = 0; i < minReps || totalTime.ElapsedMilliseconds < maxMilliseconds; i++)
             {
                 var timer = Stopwatch.StartNew();
-                action();
+                checked { action(); }
                 times.Add(timer.Elapsed.Ticks / tpus);
                 if (runOnceOnly)
                     break;
